@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Guest Dashboard{% endblock %}
+{% block content %}
+<h4 class="mb-4">Welcome back, {{ current_user.name }} 👋</h4>
+
+<div class="row g-3 mb-4">
+    <div class="col-4 col-md-4">
+        <a href="{{ url_for('guest.book') }}" class="text-decoration-none">
+            <div class="card p-3 text-center h-100">
+                <i class="bi bi-calendar-plus fs-1 text-primary"></i>
+                <h6 class="mt-2">Book a Room</h6>
+            </div>
+        </a>
+    </div>
+    <div class="col-4 col-md-4">
+        <a href="{{ url_for('guest.services') }}" class="text-decoration-none">
+            <div class="card p-3 text-center h-100">
+                <i class="bi bi-bell fs-1 text-warning"></i>
+                <h6 class="mt-2">Request Service</h6>
+            </div>
+        </a>
+    </div>
+    <div class="col-4 col-md-4">
+        <a href="{{ url_for('chat.index') }}" class="text-decoration-none">
+            <div class="card p-3 text-center h-100">
+                <i class="bi bi-chat-dots fs-1 text-success"></i>
+                <h6 class="mt-2">Trợ lý khách sạn</h6>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="mb-3">Recent Bookings</h6>
+            {% if bookings %}
+                {% for b in bookings %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong>Room {{ b.room.number }}</strong> ({{ b.room.type }})<br>
+                        <small class="text-muted">{{ b.check_in }} → {{ b.check_out }}</small>
+                    </div>
+                    <span class="badge bg-{{ 'success' if b.status == 'checked_in' else 'primary' if b.status == 'confirmed' else 'secondary' }}">
+                        {{ b.status.replace('_', ' ') }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No bookings yet. <a href="{{ url_for('guest.book') }}">Book a room</a></p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card p-3">
+            <h6 class="mb-3">Recent Service Requests</h6>
+            {% if requests %}
+                {% for r in requests %}
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <strong>{{ r.type.replace('_', ' ').title() }}</strong><br>
+                        <small class="text-muted">{{ r.description[:40] if r.description else '' }}</small>
+                    </div>
+                    <span class="badge bg-{{ 'warning text-dark' if r.status == 'pending' else 'info text-dark' if r.status == 'in_progress' else 'success' }}">
+                        {{ r.status.replace('_', ' ') }}
+                    </span>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No service requests.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

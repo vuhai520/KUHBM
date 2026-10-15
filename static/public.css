@@ -1,0 +1,29 @@
+.public-layout { background:#f6f7fa; color:#253247; }
+.public-nav { background:#fff; border-bottom:1px solid #e4e8ef; }
+.public-nav .navbar-brand { color:#1a1a2e; font-weight:750; letter-spacing:.04em; }
+.public-nav .nav-link { color:#40516a; }
+.public-nav .navbar-brand img { height:36px; width:36px; border-radius:8px; }
+.public-container { max-width:1200px; }
+.hotel-hero { background:linear-gradient(125deg,#1a1a2e,#243a5c); color:#fff; padding:clamp(28px,5vw,64px); border-radius:20px; display:grid; grid-template-columns:1.65fr 1fr; gap:42px; align-items:center; }
+.hero-eyebrow,.section-eyebrow { letter-spacing:.16em; font-size:.72rem; font-weight:700; }
+.hero-eyebrow { color:#c1d5f2; }
+.hotel-hero h1 { font-size:clamp(1.9rem,3.8vw,3.2rem); line-height:1.2; font-weight:650; margin:16px 0; }
+.hotel-hero p { color:#d4dfed; max-width:490px; line-height:1.8; margin-bottom:24px; }
+.hero-detail { border:1px solid #ffffff2e; border-radius:16px; padding:30px; background:#ffffff08; display:flex; flex-direction:column; gap:12px; }
+.hero-detail>i { font-size:3.5rem; color:#bbd0ed; }
+.hero-detail>span { color:#c6d4e7; font-size:.85rem; }
+.hero-detail>strong { font-size:1.5rem; font-weight:500; }
+.section-eyebrow { color:#6d7890; display:block; margin-bottom:8px; }
+.hotel-room { border-radius:14px; overflow:hidden; }
+.room-cover { height:170px; background:#e1e8f0; position:relative; display:flex; align-items:center; justify-content:center; color:#536c8b; }
+.room-cover.double { background:#e3ece7; color:#527565; }
+.room-cover.suite { background:#eee5d9; color:#927452; }
+.room-cover>i { font-size:4rem; }
+.room-number { position:absolute; top:15px; left:18px; font-size:1.05rem; font-weight:600; }
+.room-category { position:absolute; bottom:14px; right:16px; font-size:.85rem; font-weight:600; }
+.room-description { min-height:48px; }
+.room-amenities { display:flex; gap:18px; font-size:.8rem; color:#66768d; }
+.public-footer { border-top:1px solid #e1e6ee; color:#6d7890; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:.85rem; }
+.public-layout .alert { margin-top:20px; }
+a[aria-disabled="true"] { opacity:.5; pointer-events:none; }
+@media(max-width:767px) { .hotel-hero { grid-template-columns:1fr; gap:22px; } .hero-detail { display:none; } .public-nav .nav { gap:5px!important; font-size:.88rem; } }

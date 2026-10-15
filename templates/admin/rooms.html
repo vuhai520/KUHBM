@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Manage Rooms{% endblock %}
+{% block content %}
+<h4 class="mb-4">Manage Rooms</h4><p>Đổi giá chỉ áp dụng đơn mới. Chuyển bảo trì sẽ hủy tất cả đơn chưa nhận; phòng đang có khách phải trả trước.</p>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card p-4">
+            <h6 class="mb-3">Add New Room</h6>
+            <form method="POST" action="{{ url_for('admin.add_room') }}"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                <div class="mb-3">
+                    <label class="form-label">Room Number</label>
+                    <input type="text" name="number" class="form-control" placeholder="e.g. 101" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Type</label>
+                    <select name="type" class="form-select" required>
+                        <option value="single">Single</option>
+                        <option value="double">Double</option>
+                        <option value="suite">Suite</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Price per Night (AED)</label>
+                    <input type="number" name="price" class="form-control" step="0.01" min="1" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <input type="text" name="description" class="form-control" placeholder="Optional">
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Add Room</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr><th>Number</th><th>Type</th><th>Price/Night</th><th>Status</th><th>Trạng thái / chỉnh sửa</th></tr>
+                </thead>
+                <tbody>
+                {% for room in rooms %}
+                <tr>
+                    <td><strong>{{ room.number }}</strong></td>
+                    <td>{{ room.type.title() }}</td>
+                    <td>AED {{ room.base_price }}</td>
+                    <td>
+                        <span class="badge bg-{{ 'success' if room.status == 'available' else 'danger' if room.status == 'occupied' else 'warning text-dark' }}">
+                            {{ room.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.update_room_status', room_id=room.id) }}" class="d-flex gap-1"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                            <select name="status" class="form-select form-select-sm" style="width:130px">
+                                <option value="available" {{ 'selected' if room.status=='available' }}>Available</option>
+                                <option value="cleaning" {{ 'selected' if room.status=='cleaning' }}>Chờ dọn</option>
+                                <option value="maintenance" {{ 'selected' if room.status=='maintenance' }}>Maintenance</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary">Save</button>
+                        </form>
+                        <details class="mt-2"><summary>Sửa giá / loại phòng</summary>
+                        <form method="POST" action="{{ url_for('admin.edit_room', room_id=room.id) }}" class="mt-2"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                        <label class="form-label">Loại phòng<select name="type" class="form-select">{% for loai in ['single','double','suite'] %}<option value="{{ loai }}" {{ 'selected' if room.type==loai }}>{{ loai }}</option>{% endfor %}</select></label>
+                        <label class="form-label">Giá / đêm (AED)<input name="price" type="number" step="0.01" min="0.01" max="1000000000" value="{{ room.base_price }}" required class="form-control"></label>
+                        <label class="form-label">Mô tả<input name="description" maxlength="300" value="{{ room.description or '' }}" class="form-control"></label>
+                        <button class="btn btn-sm btn-primary">Lưu chỉnh sửa</button></form></details>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-muted text-center p-3">No rooms yet. Add one!</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

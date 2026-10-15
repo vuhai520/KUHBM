@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Đặt phòng tại quầy{% endblock %}
+{% block content %}
+<h4>Đặt phòng tại quầy</h4><p>Cùng ngày tính một đêm. Đặt tại quầy không bắt buộc cọc; số tiền được chốt lúc lưu.</p>
+<form method="post" class="card p-4" data-date-form data-counter-form data-availability="{{ url_for('reception.availability') }}"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+<div class="row g-3">
+<div class="col-md-6"><label class="form-label" for="guest_id">Chọn khách có tài khoản</label><select name="guest_id" id="guest_id" class="form-select"><option value="">Khách lẻ tại quầy</option>{% for g in guests %}<option value="{{ g.id }}">{{ g.name }}{% if g.phone %} · {{ g.phone }}{% endif %}</option>{% endfor %}</select></div>
+<div class="col-md-3"><label class="form-label" for="guest_name">Tên khách lẻ</label><input id="guest_name" name="guest_name" class="form-control" minlength="2" maxlength="100"></div>
+<div class="col-md-3"><label class="form-label" for="phone">Điện thoại khách lẻ</label><input id="phone" name="phone" class="form-control" maxlength="30"></div>
+<div class="col-md-4"><label class="form-label" for="check_in">Ngày nhận</label><input id="check_in" type="date" name="check_in" value="{{ today_iso }}" min="{{ today_iso }}" required class="form-control"></div>
+<div class="col-md-4"><label class="form-label" for="check_out">Ngày trả</label><input id="check_out" type="date" name="check_out" value="{{ today_iso }}" min="{{ today_iso }}" required class="form-control"></div>
+<div class="col-md-4"><label class="form-label" for="room_id">Phòng trống theo ngày</label><select id="room_id" name="room_id" required class="form-select"><option value="">Chọn ngày để kiểm tra</option>{% for r in rooms %}<option value="{{ r.id }}" data-price="{{ r.base_price }}">{{ r.number }} · {{ r.type }} · AED {{ r.base_price }}</option>{% endfor %}</select></div>
+</div><p id="availability-status" class="mt-3" role="status"></p><p class="alert alert-light" id="price-preview" role="status">Chọn phòng để tính tiền.</p><button class="btn btn-primary align-self-start" id="counter-submit" disabled>Đặt phòng tại quầy</button>
+</form>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Staff Dashboard{% endblock %}
+{% block content %}
+<h4 class="mb-4">Service Staff Dashboard</h4>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 class="mb-3 text-warning"><i class="bi bi-clock me-2"></i>Pending ({{ pending|length }})</h6>
+            {% for r in pending %}
+            <div class="py-2 border-bottom">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>{{ r.type.replace('_',' ').title() }}</strong><br>
+                        <small class="text-muted">{{ r.requester.name }}</small><br>
+                        <small>{{ r.description or '' }}</small>
+                    </div>
+                </div>
+                <form method="POST" action="{{ url_for('staff.update_request', req_id=r.id) }}" class="mt-2"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                    <input type="hidden" name="status" value="in_progress">
+                    <button class="btn btn-sm btn-outline-info w-100">Start →</button>
+                </form>
+            </div>
+            {% else %}
+            <p class="text-muted">No pending requests.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 class="mb-3 text-info"><i class="bi bi-gear me-2"></i>In Progress ({{ in_progress|length }})</h6>
+            {% for r in in_progress %}
+            <div class="py-2 border-bottom">
+                <strong>{{ r.type.replace('_',' ').title() }}</strong><br>
+                <small class="text-muted">{{ r.requester.name }}</small><br>
+                <small>{{ r.description or '' }}</small>
+                <form method="POST" action="{{ url_for('staff.update_request', req_id=r.id) }}" class="mt-2"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                    <input type="hidden" name="status" value="completed">
+                    <button class="btn btn-sm btn-outline-success w-100">Complete ✓</button>
+                </form>
+            </div>
+            {% else %}
+            <p class="text-muted">Nothing in progress.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h6 class="mb-3 text-success"><i class="bi bi-check-circle me-2"></i>Completed ({{ completed|length }})</h6>
+            {% for r in completed %}
+            <div class="py-2 border-bottom">
+                <strong>{{ r.type.replace('_',' ').title() }}</strong><br>
+                <small class="text-muted">{{ r.requester.name }} · {{ r.updated_at.strftime('%b %d, %H:%M') }}</small>
+            </div>
+            {% else %}
+            <p class="text-muted">No completed requests.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<div class="card p-3 mt-4"><h5>Phòng chờ dọn</h5>{% for r in rooms %}<form method="post" action="{{ url_for('staff.clean_room', room_id=r.id) }}" class="mb-2"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">Phòng {{ r.number }} <button class="btn btn-sm btn-success">Xác nhận dọn xong</button></form>{% else %}<p>Không có phòng chờ dọn.</p>{% endfor %}</div>
+{% endblock %}

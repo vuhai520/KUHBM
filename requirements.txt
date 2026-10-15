@@ -1,0 +1,9 @@
+flask
+flask-login
+flask-sqlalchemy
+flask-bcrypt
+openai==3.31.0
+httpx2[socks]==2.13.1
+gunicorn
+psycopg2-binary
+python-dotenv

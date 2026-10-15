@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Book a Room{% endblock %}
+{% block content %}
+<h4 class="mb-4">Book a Room</h4><p>Ngày trả ≥ ngày nhận. Cùng ngày tính một đêm. Cọc online mô phỏng 30%; thêm một ngày dọn không tính tiền.</p>
+
+<div class="card p-4 mb-4">
+    <form method="GET" data-date-form class="row g-3">
+        <div class="col-md-3">
+            <label class="form-label">Check-in</label>
+            <input type="date" name="check_in" min="{{ today_iso }}" class="form-control" value="{{ check_in or '' }}" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Check-out</label>
+            <input type="date" name="check_out" min="{{ check_in or today_iso }}" class="form-control" value="{{ check_out or '' }}" required>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Room Type</label>
+            <select name="room_type" class="form-select">
+                <option value="">Any</option>
+                <option value="single" {{ 'selected' if room_type == 'single' }}>Single</option>
+                <option value="double" {{ 'selected' if room_type == 'double' }}>Double</option>
+                <option value="suite" {{ 'selected' if room_type == 'suite' }}>Suite</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Search</button>
+        </div>
+    </form>
+</div>
+
+{% if rooms is not none %}
+    {% if rooms %}
+        <h6 class="mb-3">{{ rooms|length }} room(s) available</h6>
+        <div class="row g-3">
+            {% for room in rooms %}
+            <div class="col-md-4" id="room-{{ room.id }}">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">Room {{ room.number }}</h5>
+                            <span class="badge bg-success">Available</span>
+                        </div>
+                        <p class="text-muted mb-1">{{ room.type.title() }}</p>
+                        <p class="mb-1">{{ room.description or 'Comfortable room with all amenities.' }}</p>
+                        <h5 class="text-primary">AED {{ room.base_price }}/night</h5>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <form data-book-result method="POST" action="{{ url_for('guest.confirm_booking', room_id=room.id) }}"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}">
+                            <input type="hidden" name="check_in" value="{{ check_in }}">
+                            <input type="hidden" name="check_out" value="{{ check_out }}">
+                            <button type="submit" class="btn btn-primary w-100">Book Now</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">No rooms available for the selected dates. Try different dates.</div>
+    {% endif %}
+{% endif %}
+{% endblock %}

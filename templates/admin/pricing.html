@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Dynamic Pricing{% endblock %}
+{% block content %}
+<h4 class="mb-4">Dynamic Pricing</h4>
+
+<div class="alert alert-info">
+    <strong>Current Occupancy: {{ occupancy_rate }}%</strong>
+    Prices are adjusted based on current demand.
+    High occupancy (&gt;80%) raises prices by 30%, low occupancy (&lt;30%) reduces by 15%.
+</div>
+
+<div class="card">
+<div class="table-responsive">
+    <table class="table table-hover mb-0">
+        <thead class="table-light">
+            <tr><th>Room</th><th>Type</th><th>Base Price</th><th>Suggested Price</th><th>Change</th></tr>
+        </thead>
+        <tbody>
+        {% for p in pricing %}
+        <tr>
+            <td><strong>{{ p.room.number }}</strong></td>
+            <td>{{ p.room.type.title() }}</td>
+            <td>AED {{ "%.2f"|format(p.room.base_price) }}</td>
+            <td><strong>AED {{ "%.2f"|format(p.suggested_price) }}</strong></td>
+            <td>
+                {% if p.change > 0 %}
+                    <span class="text-success">▲ {{ p.change }}%</span>
+                {% elif p.change < 0 %}
+                    <span class="text-danger">▼ {{ p.change|abs }}%</span>
+                {% else %}
+                    <span class="text-muted">0%</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-muted text-center p-3">No rooms found.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

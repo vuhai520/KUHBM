@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Tin nhắn{% endblock %}
+{% block content %}
+<h4 class="mb-4">Tin nhắn</h4>
+<div class="row g-3"><div class="col-md-4"><div class="list-group">{% for p in contacts %}<a class="list-group-item list-group-item-action {{ 'active' if recipient and recipient.id==p.id }}" href="{{ url_for('messages.thread', user_id=p.id) }}">{{ p.name }} <small>· {{ role_labels.get(p.role, 'Thành viên') }}</small></a>{% else %}<div class="list-group-item">Chưa có người liên hệ.</div>{% endfor %}</div></div><div class="col-md-8"><div class="card p-3">
+{% if recipient %}<h5>{{ recipient.name }}</h5><div id="human-messages" style="height:50vh;overflow:auto" aria-live="polite" data-last="{{ messages[-1].id if messages else 0 }}">{% for m in messages %}<div class="mb-2 p-2 rounded {{ 'bg-primary text-white ms-5' if m.sender_id==current_user.id else 'bg-light me-5' }}" style="white-space:pre-wrap;overflow-wrap:anywhere">{{ m.body }}<small class="d-block">{{ m.created_at }} UTC</small></div>{% endfor %}</div><form id="human-form" class="mt-3"><label for="human-input" class="form-label">Nội dung</label><textarea id="human-input" maxlength="2000" required class="form-control" rows="2"></textarea><button class="btn btn-primary mt-2">Gửi</button></form><p id="chat-status" role="status" class="mt-2"></p>{% else %}<p>Chọn người liên hệ để bắt đầu.</p>{% endif %}
+</div></div></div>
+{% endblock %}
+{% block scripts %}{% if recipient %}<script>
+const hop=document.getElementById('human-messages'),form=document.getElementById('human-form'),nhap=document.getElementById('human-input'),nut=form.querySelector('button'),thongBao=document.getElementById('chat-status');
+let dangTai=false;
+async function taiTin(){if(dangTai)return;dangTai=true;try{const r=await fetch({{ url_for('messages.updates',user_id=recipient.id)|tojson }}+'?after='+hop.dataset.last);if(!r.ok)throw Error();const data=await r.json();for(const m of data.messages){const div=document.createElement('div');div.className='mb-2 p-2 rounded '+(m.mine?'bg-primary text-white ms-5':'bg-light me-5');div.style.whiteSpace='pre-wrap';div.style.overflowWrap='anywhere';div.textContent=m.body;const gio=document.createElement('small');gio.className='d-block';gio.textContent=new Date(m.time).toLocaleString('vi-VN');div.append(gio);hop.append(div);hop.dataset.last=m.id;}if(data.messages.length)hop.scrollTop=hop.scrollHeight;thongBao.textContent='';}catch{thongBao.textContent='Không tải được tin mới. Sẽ tự thử lại.';}finally{dangTai=false;}}
+form.addEventListener('submit',async e=>{e.preventDefault();const message=nhap.value.trim();if(!message)return;nut.disabled=true;try{const r=await fetch({{ url_for('messages.send',user_id=recipient.id)|tojson }},{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':document.querySelector('meta[name=csrf-token]').content},body:JSON.stringify({message})});if(!r.ok)throw Error();nhap.value='';await taiTin();}catch{thongBao.textContent='Gửi thất bại. Tin bạn nhập vẫn được giữ.';}finally{nut.disabled=false;}});
+hop.scrollTop=hop.scrollHeight;setInterval(taiTin,3000);
+</script>{% endif %}{% endblock %}

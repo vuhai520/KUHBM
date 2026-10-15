@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Lễ tân{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap gap-2 justify-content-between mb-4"><h4>Lễ tân · Đặt phòng & thanh toán</h4><div><a class="btn btn-primary" href="{{ url_for('reception.book') }}">Đặt tại quầy</a> <a class="btn btn-outline-primary" href="{{ url_for('reception.requests_view') }}">Yêu cầu khách</a> <a class="btn btn-outline-secondary" href="{{ url_for('messages.index') }}">Tin nhắn</a></div></div>
+<p class="alert alert-info">Chế độ thanh toán thử nghiệm — không phát sinh giao dịch tiền thật.</p>
+<div class="card table-responsive mb-4"><table class="table align-middle mb-0"><thead><tr><th>Đơn / khách</th><th>Phòng</th><th>Nhận → trả</th><th>Tiền phòng / còn thu</th><th>Trạng thái</th><th>Xử lý</th></tr></thead><tbody>
+{% for b in bookings %}<tr><td>#{{ b.id }} · {{ b.guest.name }}<br><small>{{ 'Tại quầy' if b.source == 'counter' else 'Online' }}</small></td><td>{{ b.room.number }}</td><td>{{ b.check_in }} → {{ b.check_out }}</td><td>AED {{ '%.2f'|format(b.total_price) }}<br><small>Còn thu: AED {{ '%.2f'|format(b.con_phai_thu) }}</small></td><td>{{ b.status }}{% if b.cancel_reason %}<br><small>{{ b.cancel_reason }}</small>{% endif %}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('reception.bill', booking_id=b.id) }}">Chi tiết / tính tiền</a></td></tr>{% else %}<tr><td colspan="6">Chưa có đơn.</td></tr>{% endfor %}
+</tbody></table></div>
+<h5>Tình trạng phòng hiện tại</h5><div class="row g-3">{% for r in rooms %}<div class="col-md-3"><div class="card p-3"><strong>Phòng {{ r.number }} · {{ r.type }}</strong><span>{{ r.status }}</span>{% if r.status == 'cleaning' %}<form method="post" action="{{ url_for('reception.clean_room', room_id=r.id) }}"><input type="hidden" name="csrf_token" value="{{ session['csrf_token'] }}"><button class="btn btn-sm btn-success mt-2">Xác nhận dọn xong</button></form>{% endif %}</div></div>{% endfor %}</div>
+{% endblock %}

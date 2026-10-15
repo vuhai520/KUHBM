@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}KUHBM · Khám phá phòng nghỉ{% endblock %}
+{% block content %}
+<section class="hotel-hero mt-4 mb-4">
+    <div><span class="hero-eyebrow">CHÀO MỪNG ĐẾN KUHBM</span><h1>Chọn một không gian<br>cho kỳ nghỉ của bạn.</h1><p>Khám phá các hạng phòng, chọn ngày phù hợp và đặt phòng chỉ trong vài bước.</p><a class="btn btn-light px-4" href="#rooms">Khám phá phòng</a></div>
+    <div class="hero-detail"><i class="bi bi-building" aria-hidden="true"></i><span>Không gian thoải mái</span><strong>Dành cho chuyến đi<br>theo cách của bạn.</strong></div>
+</section>
+<section aria-labelledby="search-title" class="mb-4"><h2 id="search-title" class="h5">Tìm phòng cho chuyến đi</h2>
+<form action="{{ url_for('auth.index') }}#rooms" method="get" class="card p-3 p-md-4 row-gap-3" data-date-form>
+<div class="row g-3 align-items-end">
+    <div class="col-md-3"><label for="arrival" class="form-label">Ngày nhận phòng</label><input id="arrival" name="check_in" type="date" min="{{ today_iso }}" value="{{ filters.check_in }}" required class="form-control"></div>
+    <div class="col-md-3"><label for="departure" class="form-label">Ngày trả phòng</label><input id="departure" name="check_out" type="date" min="{{ filters.check_in or today_iso }}" value="{{ filters.check_out }}" required class="form-control"></div>
+    <div class="col-md-3"><label for="category" class="form-label">Loại phòng</label><select id="category" name="room_type" class="form-select"><option value="">Tất cả loại phòng</option>{% for value,label in room_labels.items() %}<option value="{{ value }}" {{ 'selected' if filters.room_type==value }}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="col-md-3"><button class="btn btn-primary w-100">Kiểm tra phòng trống</button></div>
+</div><p class="small text-muted mt-3 mb-0">Ngày trả có thể trùng ngày nhận; lưu trú trong ngày tính một đêm.</p>
+</form></section>
+<section id="rooms" aria-labelledby="rooms-title">
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3"><div><span class="section-eyebrow">PHÒNG NGHỈ</span><h2 id="rooms-title" class="h3 mb-1">{{ 'Phòng phù hợp với lịch của bạn' if searched else 'Các phòng tại KUHBM' }}</h2><p class="text-muted mb-0">{{ rooms|length }} phòng {{ 'phù hợp' if searched else 'đang giới thiệu' }}{% if not searched %} · Chọn ngày để kiểm tra lịch trống{% endif %}</p></div>{% if searched or filters.room_type %}<a href="{{ url_for('auth.index') }}#rooms">Xem tất cả phòng</a>{% endif %}</div>
+<p data-stale-notice class="alert alert-light d-none" role="status">Bạn đã đổi lịch. Bấm kiểm tra phòng trống để cập nhật kết quả.</p>
+<div class="row g-4">
+{% for room in rooms %}
+<article class="col-md-6 col-lg-4" id="room-{{ room.id }}"><div class="card hotel-room h-100">
+    <div class="room-cover {{ room.type }}"><span class="room-number">{{ room.number }}</span><i class="bi bi-door-open" aria-hidden="true"></i><span class="room-category">{{ room_labels.get(room.type, 'Phòng nghỉ') }}</span></div>
+    <div class="card-body d-flex flex-column"><h3 class="h5">{{ room_labels.get(room.type, 'Phòng nghỉ') }} · {{ room.number }}</h3><p class="text-muted room-description">{{ room.description or 'Không gian nghỉ ngơi tiện nghi và thoải mái.' }}</p>
+    <div class="room-amenities mb-3"><span><i class="bi bi-calendar-check" aria-hidden="true"></i> Đặt phòng trực tuyến</span></div>
+    <p class="mt-auto mb-3"><strong class="h4 text-primary">AED {{ '%.2f'|format(room.base_price) }}</strong><span class="text-muted"> / đêm</span></p>
+    {% set destination=url_for('guest.book', check_in=filters.check_in, check_out=filters.check_out, room_type=room.type, _anchor='room-' ~ room.id) %}
+    <div data-book-result><a class="btn btn-primary w-100" href="{{ destination if current_user.is_authenticated and current_user.role=='guest' else url_for('auth.login', next=destination) if not current_user.is_authenticated else url_for('auth.dashboard') }}">{{ 'Đặt phòng' if current_user.is_authenticated and current_user.role=='guest' else 'Đăng nhập để đặt phòng' if not current_user.is_authenticated else 'Vào khu vực quản lý' }}</a></div>
+    </div></div></article>
+{% else %}<div class="col-12"><div class="card p-5 text-center"><h3 class="h5">Chưa có phòng phù hợp</h3><p class="text-muted">Bạn có thể đổi ngày hoặc loại phòng để tìm lại.</p><a href="{{ url_for('auth.index') }}#rooms">Xem các phòng khác</a></div></div>{% endfor %}
+</div></section>
+<footer class="public-footer mt-5 py-4"><strong>KUHBM</strong><span>Chọn phòng. Lên kế hoạch. Tận hưởng chuyến đi.</span></footer>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Trợ lý khách sạn{% endblock %}
+{% block content %}
+<h4 class="mb-4">Trợ lý khách sạn</h4>
+
+<div class="card" style="max-width: 700px;">
+    <div class="card-body p-0">
+        <div id="chat-messages" style="height: 55vh; min-height: 280px; max-height: 480px; overflow-y: auto; padding: 1.5rem;">
+            <div class="d-flex mb-3">
+                <div class="bg-primary text-white rounded p-3" style="max-width:80%;">
+                    Xin chào! Mình có thể hỗ trợ bạn tìm hiểu về phòng nghỉ, dịch vụ và thông tin lưu trú.
+                </div>
+            </div>
+        </div>
+        <div class="border-top p-3">
+            <div class="input-group">
+                <input type="text" id="chat-input" maxlength="500" class="form-control" placeholder="Nhập câu hỏi của bạn..." autocomplete="off">
+                <button class="btn btn-primary" id="send-btn">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<style>
+.typing-indicator span {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    margin: 0 2px;
+    background: #adb5bd;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-6px); }
+}
+</style>
+<script>
+const messagesDiv = document.getElementById('chat-messages');
+const input = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+
+function addMessage(text, isUser) {
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-3 ' + (isUser ? 'justify-content-end' : '');
+    const bubble = document.createElement('div');
+    bubble.className = isUser
+        ? 'bg-secondary text-white rounded p-3'
+        : 'bg-light border rounded p-3';
+    bubble.style.maxWidth = '80%';
+    bubble.style.whiteSpace = 'pre-wrap';
+    bubble.textContent = text; // Không chèn HTML do người dùng/AI tạo.
+    div.appendChild(bubble);
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function showTypingIndicator() {
+    const div = document.createElement('div');
+    div.className = 'd-flex mb-3';
+    div.id = 'typing-indicator';
+    div.innerHTML = `
+        <div class="bg-light border rounded p-3 typing-indicator">
+            <span></span><span></span><span></span>
+        </div>`;
+    messagesDiv.appendChild(div);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typing-indicator');
+    if (indicator) indicator.remove();
+}
+
+async function sendMessage() {
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = '';
+    addMessage(message, true);
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Gửi';
+    showTypingIndicator();
+
+    try {
+        const res = await fetch('{{ url_for("chat.send") }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name=csrf-token]').content},
+            body: JSON.stringify({message})
+        });
+        const data = await res.json();
+        removeTypingIndicator();
+        addMessage(data.response, false);
+    } catch {
+        removeTypingIndicator();
+        addMessage('Hiện chưa gửi được câu hỏi. Bạn vui lòng thử lại sau.', false);
+    }
+    sendBtn.disabled = false;
+    input.focus();
+}
+
+sendBtn.addEventListener('click', sendMessage);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+</script>
+{% endblock %}
